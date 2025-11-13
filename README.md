@@ -1,73 +1,178 @@
-# Welcome to your Lovable project
+# Pi Log Manager
 
-## Project info
+A professional full-stack application for managing and monitoring log collection from multiple Raspberry Pi devices.
 
-**URL**: https://lovable.dev/projects/674543c0-483f-4d3e-a175-32438876dc15
+## 🚀 Features
 
-## How can I edit this code?
+- **Real-time Pi Monitoring** - Live status updates for all connected Raspberry Pis
+- **One-Click Log Collection** - Start/Stop log collection across multiple devices simultaneously
+- **Network Auto-Discovery** - Automatic detection of Pis via ARP scanning
+- **USB Status Monitoring** - Track USB device connections on each Pi
+- **Batch Management** - Organize log collections by batch ID with timestamps
+- **Beautiful Dashboard** - Modern, responsive UI with dark theme
+- **Activity Logging** - Real-time console logs for all operations
 
-There are several ways of editing your application.
+## 📋 Prerequisites
 
-**Use Lovable**
+### Frontend
+- Node.js 18+ and npm
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/674543c0-483f-4d3e-a175-32438876dc15) and start prompting.
+### Backend
+- Python 3.10+
+- sshpass (for automated SSH)
+- arp-scan (for network discovery)
+- FastAPI and dependencies
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Installation
 
-**Use your preferred IDE**
+### Frontend Setup
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. **Install dependencies:**
+```bash
+npm install
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. **Configure environment:**
+```bash
+cp .env.example .env
+# Edit .env if your backend runs on a different host/port
+```
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. **Start development server:**
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The frontend will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Backend Setup
 
-**Use GitHub Codespaces**
+1. **Install Python dependencies:**
+```bash
+pip install fastapi uvicorn pydantic sshpass
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+2. **Configure your Pis:**
+Create `hot_transfer/pis.json` with your Pi MAC addresses:
+```json
+{
+  "b8:27:eb:xx:xx:xx": "Pi-1",
+  "b8:27:eb:yy:yy:yy": "Pi-2"
+}
+```
 
-## What technologies are used for this project?
+3. **Set environment variables (optional):**
+```bash
+export PI_USER="pi"
+export PI_PASS="raspberry"
+export API_PORT="8055"
+export REMOTE_DIR="/home/pi/router_logs"
+```
 
-This project is built with:
+4. **Run the backend:**
+```bash
+python manager.py
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The backend API will be available at `http://localhost:8055`
 
-## How can I deploy this project?
+## 🎯 Usage
 
-Simply open [Lovable](https://lovable.dev/projects/674543c0-483f-4d3e-a175-32438876dc15) and click on Share -> Publish.
+1. **Start the Backend**: Run `python manager.py`
+2. **Start the Frontend**: Run `npm run dev`
+3. **Open Dashboard**: Navigate to `http://localhost:8080/dashboard`
+4. **Start Logging**: Click "Start Logging" to begin collecting logs from connected Pis
+5. **Monitor Status**: Watch real-time status updates in the Pi grid
+6. **Stop & Transfer**: Click "Stop & Transfer" to collect all logs
 
-## Can I connect a custom domain to my Lovable project?
+## 📁 Directory Structure
 
-Yes, you can!
+```
+├── src/
+│   ├── components/         # React components
+│   │   ├── PiStatusGrid.tsx
+│   │   ├── LogsPanel.tsx
+│   │   └── ui/            # shadcn/ui components
+│   ├── pages/
+│   │   ├── Dashboard.tsx   # Main dashboard
+│   │   └── Index.tsx
+│   ├── hooks/             # Custom React hooks
+│   └── lib/               # Utilities
+├── hot_transfer/          # Backend working directory
+│   ├── pis.json          # Pi configuration
+│   └── footprints.json   # Transfer history
+├── Target/               # Collected logs destination
+└── manager.py           # FastAPI backend server
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🔧 Configuration
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Frontend Configuration (.env)
+```bash
+VITE_API_BASE=http://localhost:8055
+```
+
+### Backend Configuration (environment variables)
+- `PI_USER` - SSH username (default: "pi")
+- `PI_PASS` - SSH password (default: "raspberry")
+- `API_PORT` - API server port (default: 8055)
+- `REMOTE_DIR` - Log directory on Pis (default: "/home/pi/router_logs")
+- `SSH_CONNECT_TIMEOUT` - SSH connection timeout in seconds
+- `ARP_TTL` - ARP cache TTL in seconds
+- `STATUS_CONC` - Concurrent status checks
+- `SCP_CONC` - Concurrent file transfers
+
+## 🔌 API Endpoints
+
+### GET /status
+Returns current status of all Pis and active batch
+
+### POST /start
+Initiates log collection on all connected Pis
+
+### POST /stop
+Stops logging and transfers all collected logs
+
+### GET /health
+Backend health check and system status
+
+## 🎨 Tech Stack
+
+### Frontend
+- React 18 with TypeScript
+- Vite for fast development
+- Tailwind CSS for styling
+- shadcn/ui component library
+- React Router for navigation
+- TanStack Query for data fetching
+
+### Backend
+- FastAPI (Python)
+- asyncio for concurrent operations
+- SSH/SCP for remote operations
+- ARP scanning for network discovery
+
+## 🐛 Troubleshooting
+
+**Pis not detected:**
+- Ensure Pis are on the same network
+- Check MAC addresses in `pis.json`
+- Verify SSH credentials
+
+**Connection timeout:**
+- Increase `SSH_CONNECT_TIMEOUT`
+- Check network connectivity
+- Verify firewall rules
+
+**Frontend can't connect:**
+- Ensure backend is running on port 8055
+- Check CORS settings
+- Verify `VITE_API_BASE` in .env
+
+## 📄 License
+
+This project is for internal use.
+
+## 🤝 Support
+
+For issues or questions, please contact the development team.
